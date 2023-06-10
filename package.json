@@ -1,0 +1,38 @@
+{
+  "name": "homebridge-videofied-alarm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "rimraf ./dist && tsc",
+    "prepublishOnly": "npm run build",
+    "postpublish": "npm run clean",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Long Zheng",
+  "engines": {
+    "homebridge": ">=1.0.0"
+  },
+  "keywords": [
+    "homebridge-plugin"
+  ],
+  "license": "MIT",
+  "files": [
+    "LICENSE",
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/longzheng/homebrdge-videofied-alarm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/longzheng/homebrdge-videofied-alarm/issues"
+  },
+  "devDependencies": {
+    "@types/node": "16.11.7",
+    "typescript": "^5.0.4",
+    "rimraf": "^5.0.0",
+    "homebridge": "^1.6.1"
+  }
+}
