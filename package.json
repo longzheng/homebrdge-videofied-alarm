@@ -24,10 +24,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/longzheng/homebrdge-videofied-alarm.git"
+    "url": "git://github.com/longzheng/homebridge-videofied-alarm.git"
   },
   "bugs": {
-    "url": "https://github.com/longzheng/homebrdge-videofied-alarm/issues"
+    "url": "https://github.com/longzheng/homebridge-videofied-alarm/issues"
   },
   "devDependencies": {
     "@types/node": "16.11.7",
