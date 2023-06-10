@@ -1,4 +1,4 @@
-# homebrdge-videofied-alarm
+# homebridge-videofied-alarm
 Homebridge plugin for controlling Videofied alarm systems
 
 - Simulates a Frontel alarm server (requires panel configuration)
