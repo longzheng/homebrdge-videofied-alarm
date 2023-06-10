@@ -8,7 +8,7 @@ Homebridge plugin for controlling Videofied alarm systems
 
 ## Install
 ```
-npm i -g homebrdge-videofied-alarm
+npm i -g homebridge-videofied-alarm
 ```
 
 ## Homebridge config
