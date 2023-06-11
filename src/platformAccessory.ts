@@ -11,6 +11,7 @@ import { Config } from "./config";
 
 import { HomebridgePlatform } from "./platform";
 import { AlarmServer } from "./server";
+import { Event } from "./videofied";
 
 type AlarmState =
   | "disarmed"
@@ -110,6 +111,7 @@ export class VideofiedAlarmAccessory implements AccessoryPlugin {
             case "armAway":
             case "armNight": {
               // disarm > arm
+              // the server can only send a generic arming command without specifying the profile 
               return this.alarmServer.arm();
             }
           }
@@ -139,22 +141,22 @@ export class VideofiedAlarmAccessory implements AccessoryPlugin {
     }
   };
 
-  private handleEvent = (eventData: string[]) => {
-    const eventType = eventData[0];
-
-    switch (eventType) {
-      case "24":
-        // armed
+  private handleEvent = (event: Event) => {
+    switch (event.type) {
+      case "armed":
         this.cachedAlarmState = "armedAway";
         this.cachedAlarmTargetState = "armAway";
         break;
-      case "25":
-        // disarmed
+      case "disarmed":
         this.cachedAlarmState = "disarmed";
         this.cachedAlarmTargetState = "disarm";
         break;
-      case "1":
-      case "29":
+      case "intrusion":
+      case "tamper":
+      case "alarmTest":
+      case "panic":
+      case "panicMedical":
+      case "panicSmoke":
         this.cachedAlarmState = "alarmTriggered";
         break;
     }

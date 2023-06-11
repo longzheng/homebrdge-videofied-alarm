@@ -1,16 +1,16 @@
 import { createCipheriv, randomBytes } from "crypto";
 import { Logger } from "homebridge";
 import { Socket, createServer } from "net";
-import { commands, generatePresharedKey } from "./videofied";
+import { Event, commands, generatePresharedKey, parseEvent } from "./videofied";
 
 export class AlarmServer {
   private readonly log: Logger;
-  private readonly handleEvent: (eventData: string[]) => void;
+  private readonly handleEvent: (event: Event) => void;
   private socket: Socket | undefined;
   private preSharedKey: string | undefined;
   private heartbeatInterval: NodeJS.Timer | undefined;
 
-  constructor(log: Logger, handleEvent: (eventData: string[]) => void) {
+  constructor(log: Logger, handleEvent: (event: Event) => void) {
     this.log = log;
     this.handleEvent = handleEvent;
     this.startServer();
@@ -121,7 +121,11 @@ export class AlarmServer {
           }
 
           case "EVENT": {
-            this.handleEvent(eventData);
+            const event = parseEvent(eventData);
+
+            this.log.debug(`parsed event: ${JSON.stringify(event)}`);
+
+            this.handleEvent(event);
             break;
           }
 

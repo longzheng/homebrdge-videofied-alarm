@@ -12,6 +12,81 @@ export const commands = {
   disarm: "ARMING,0",
 } as const;
 
+export type Event =
+  | {
+      type: "intrusion" | "tamper";
+      peripheral: string;
+      detector: string;
+    }
+  | {
+      type: "panic" | "panicSmoke" | "panicMedical";
+      peripheral: string;
+    }
+  | {
+      type: "armed" | "disarmed";
+      armingProfile: string;
+      codeOrBadge: string;
+    }
+  | {
+      type: "alarmTest";
+    }
+  | {
+      type: "unknown";
+    };
+
+export const parseEvent = (eventData: string[]): Event => {
+  switch (eventData[0]) {
+    case "1":
+      return {
+        type: "intrusion",
+        peripheral: eventData[1]!,
+        detector: eventData[2]!,
+      };
+    case "3":
+      return {
+        type: "tamper",
+        peripheral: eventData[1]!,
+        detector: eventData[2]!,
+      };
+    case "5":
+      return {
+        type: "panic",
+        peripheral: eventData[1]!,
+      };
+    case "24":
+      return {
+        type: "armed",
+        armingProfile: eventData[1]!,
+        codeOrBadge: eventData[2]!,
+      };
+    case "25":
+      return {
+        type: "disarmed",
+        armingProfile: eventData[1]!,
+        codeOrBadge: eventData[2]!,
+      };
+    case "29":
+      return {
+        type: "alarmTest",
+      };
+    case "32":
+      return {
+        type: "panicSmoke",
+        peripheral: eventData[1]!,
+      };
+    case "34":
+      return {
+        type: "panicMedical",
+        peripheral: eventData[1]!,
+      };
+    default: {
+      return {
+        type: "unknown",
+      };
+    }
+  }
+};
+
 // key extracted from videofied panel serial number
 // https://cybergibbons.com/alarms-2/multiple-serious-vulnerabilities-in-rsi-videofieds-alarm-protocol/
 export const generatePresharedKey = (serial: string) =>
