@@ -35,7 +35,7 @@ You must configure the Videofied panel to connect to the server. The panel must 
 
 By default the panel will only connect to the server upon an event (e.g. armed/disarmed) and disconnect from the server after 5 minutes. After the panel is disconnected, it is no longer possible to send commands to the panel.
 
-To workaround this, the simulated server will try to send a dummy ACK command to the panel every 1 minute which appears to prevent it from disconnecting. However if at any point the server restarts, then the connection will be killed and cannot be recovered until the panel next connects to the server to send an event.
+To workaround this, the simulated server will try to send a dummy command to the panel every 1 minute which appears to prevent it from disconnecting. However if at any point the server restarts, then the connection will be killed and cannot be recovered until the panel next connects to the server to send an event.
 
 Tested with XT-iP730 on firmware 04.04.37.0F8F
 
