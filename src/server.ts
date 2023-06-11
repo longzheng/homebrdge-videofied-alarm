@@ -1,6 +1,7 @@
 import { createCipheriv, randomBytes } from "crypto";
 import { Logger } from "homebridge";
 import { Socket, createServer } from "net";
+import { commands, generatePresharedKey } from "./videofied";
 
 export class AlarmServer {
   private readonly log: Logger;
@@ -27,7 +28,7 @@ export class AlarmServer {
       );
 
       // send initial IDENT
-      this.sendMessage("IDENT,1000");
+      this.sendMessage(commands.identify);
 
       socket.on("data", (data) => {
         const message = deleteX1A(data.toString());
@@ -52,14 +53,14 @@ export class AlarmServer {
             this.log.debug("pre-shared key from serial", this.preSharedKey);
 
             // set pre-shared key on panel
-            this.sendMessage(`SETKEY,${this.preSharedKey}`);
+            this.sendMessage(commands.setKey(this.preSharedKey));
 
             // send version
-            this.sendMessage("VERSION,2,0");
+            this.sendMessage(commands.version);
 
             // generate server challenge
             const serverChallenge = generateRandomChallenge();
-            this.sendMessage(`AUTH1,${serverChallenge}`);
+            this.sendMessage(commands.auth1(serverChallenge));
 
             break;
           }
@@ -78,7 +79,7 @@ export class AlarmServer {
             const response = getChallengeResponse(this.preSharedKey, challenge);
 
             // respond to panel challenge
-            this.sendMessage(`AUTH3,${response}`);
+            this.sendMessage(commands.auth3(response));
             break;
           }
 
@@ -92,28 +93,30 @@ export class AlarmServer {
               panelSerial,
             ] = eventData;
 
-            this.log.info(`panel authenticated successfully. serial: ${panelSerial}, account number: ${accountNumber}, panel datetime: ${datetime}`);
+            this.log.info(
+              `panel authenticated successfully. serial: ${panelSerial}, account number: ${accountNumber}, panel datetime: ${datetime}`
+            );
 
             break;
           }
 
           case "ALARM": {
-            this.sendMessage("ALARM_ACK");
+            this.sendMessage(commands.alarmAck);
             break;
           }
 
           case "LOG": {
-            this.sendMessage("LOG_ACK");
+            this.sendMessage(commands.logAck);
             break;
           }
 
           case "FILE": {
-            this.sendMessage("FILE_ACK");
+            this.sendMessage(commands.fileAck);
             break;
           }
 
           case "REQACK": {
-            this.sendMessage("ACK");
+            this.sendMessage(commands.ack);
             break;
           }
 
@@ -135,7 +138,7 @@ export class AlarmServer {
 
       socket.on("end", () => {
         this.log.info("panel disconnected");
-        
+
         this.socket = undefined;
         if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
       });
@@ -165,65 +168,31 @@ export class AlarmServer {
   // sending an ACK command seems to be enough to keep the panel connected
   private heartbeat = () => {
     this.log.debug("sending heartbeat to keep panel connected to server");
-    this.sendMessage("ACK");
+    this.sendMessage(commands.ack);
   };
 
   public arm = (): boolean => {
-    return this.sendMessage("ARMING,1");
+    return this.sendMessage(commands.arm);
   };
 
   public disarm = (): boolean => {
-    return this.sendMessage("ARMING,0");
+    return this.sendMessage(commands.disarm);
   };
 }
 
-export const decodeHex = (string: string) => Buffer.from(string, "hex");
+const decodeHex = (string: string) => Buffer.from(string, "hex");
 
-export const generatePresharedKey = (serial: string) =>
-  serial[4] +
-  "0" +
-  serial[15] +
-  serial[11] +
-  "0" +
-  serial[5] +
-  serial[13] +
-  serial[6] +
-  serial[8] +
-  serial[12] +
-  serial[7] +
-  serial[14] +
-  "1" +
-  "0" +
-  serial[10] +
-  serial[9] +
-  serial[7] +
-  serial[10] +
-  serial[4] +
-  serial[15] +
-  serial[13] +
-  serial[6] +
-  serial[12] +
-  "0" +
-  serial[8] +
-  "0" +
-  serial[14] +
-  "1" +
-  serial[11] +
-  serial[11] +
-  "0" +
-  serial[5];
-
-export const generateRandomChallenge = () => {
+const generateRandomChallenge = () => {
   return randomBytes(16).toString("hex").toUpperCase();
 };
 
-export const getChallengeResponse = (key: string, challenge: string) => {
+const getChallengeResponse = (key: string, challenge: string) => {
   const cipher = createCipheriv("aes-128-ecb", decodeHex(key), null);
 
   return cipher.update(decodeHex(challenge)).toString("hex").toUpperCase();
 };
 
-export const deleteX1A = (string: string) => {
+const deleteX1A = (string: string) => {
   if (string.endsWith("\x1a")) {
     return string.slice(0, -1);
   }
