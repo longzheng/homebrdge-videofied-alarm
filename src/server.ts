@@ -4,10 +4,10 @@ import { Socket, createServer } from "net";
 
 export class AlarmServer {
   private readonly log: Logger;
+  private readonly handleEvent: (eventData: string[]) => void;
   private socket: Socket | undefined;
   private preSharedKey: string | undefined;
-
-  public handleEvent: (eventData: string[]) => void;
+  private heartbeatInterval: NodeJS.Timer | undefined;
 
   constructor(log: Logger, handleEvent: (eventData: string[]) => void) {
     this.log = log;
@@ -17,9 +17,14 @@ export class AlarmServer {
 
   private startServer = () => {
     const server = createServer((socket) => {
-      this.log.debug(`panel connection from ${socket.remoteAddress}`);
+      this.log.info(`panel connection from ${socket.remoteAddress}`);
 
       this.socket = socket;
+      this.heartbeatInterval = setInterval(
+        this.heartbeat,
+        // every minute
+        60 * 1000
+      );
 
       // send initial IDENT
       this.sendMessage("IDENT,1000");
@@ -78,8 +83,6 @@ export class AlarmServer {
           }
 
           case "AUTH_SUCCESS": {
-            this.log.debug("authenticated successfully");
-
             const [
               accountNumber,
               _unknown1,
@@ -88,6 +91,8 @@ export class AlarmServer {
               _unknown3,
               panelSerial,
             ] = eventData;
+
+            this.log.info(`panel authenticated successfully. serial: ${panelSerial}, account number: ${accountNumber}, panel datetime: ${datetime}`);
 
             break;
           }
@@ -129,8 +134,10 @@ export class AlarmServer {
       });
 
       socket.on("end", () => {
-        this.log.debug("panel disconnected");
+        this.log.info("panel disconnected");
+        
         this.socket = undefined;
+        if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
       });
 
       socket.on("error", (err) => {
@@ -139,7 +146,7 @@ export class AlarmServer {
     });
 
     server.listen(888, () => {
-      this.log.debug(`server started on ${JSON.stringify(server.address())}`);
+      this.log.info(`server started on ${JSON.stringify(server.address())}`);
     });
   };
 
@@ -152,7 +159,14 @@ export class AlarmServer {
     this.log.debug("sending:", message);
     this.socket.write(`${message}\x1a`);
     return true;
-  }
+  };
+
+  // the panel will disconnect from the server if there's no activity for 5 minutes
+  // sending an ACK command seems to be enough to keep the panel connected
+  private heartbeat = () => {
+    this.log.debug("sending heartbeat to keep panel connected to server");
+    this.sendMessage("ACK");
+  };
 
   public arm = (): boolean => {
     return this.sendMessage("ARMING,1");
