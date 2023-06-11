@@ -169,10 +169,11 @@ export class AlarmServer {
   };
 
   // the panel will disconnect from the server if there's no activity for 5 minutes
-  // sending an ACK command seems to be enough to keep the panel connected
+  // sending a STATUS command seems to be enough to keep the panel connected
+  // sending a ACK command seems to still timeout after an hour
   private heartbeat = () => {
     this.log.debug("sending heartbeat to keep panel connected to server");
-    this.sendMessage(commands.ack);
+    this.sendMessage(commands.status);
   };
 
   public arm = (): boolean => {

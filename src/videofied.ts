@@ -10,6 +10,7 @@ export const commands = {
   ack: "ACK",
   arm: "ARMING,1",
   disarm: "ARMING,0",
+  status: "STATUS",
 } as const;
 
 export type Event =
@@ -34,6 +35,7 @@ export type Event =
       type: "unknown";
     };
 
+// events list https://resideo.kayako.com/article/561-events-list-frontel
 export const parseEvent = (eventData: string[]): Event => {
   switch (eventData[0]) {
     case "1":
