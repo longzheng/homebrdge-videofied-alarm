@@ -148,7 +148,7 @@ export class AlarmServer {
       });
 
       socket.on("error", (err) => {
-        this.log.debug("socket error", err);
+        this.log.error("socket error", err);
       });
     });
 

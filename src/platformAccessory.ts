@@ -95,7 +95,7 @@ export class VideofiedAlarmAccessory implements AccessoryPlugin {
       }
     })();
 
-    this.log.debug(
+    this.log.info(
       `Setting updated alarm target state: ${this.cachedAlarmTargetState}, previous target state: ${previousTargetState}`
     );
 
@@ -111,7 +111,8 @@ export class VideofiedAlarmAccessory implements AccessoryPlugin {
             case "armAway":
             case "armNight": {
               // disarm > arm
-              // the server can only send a generic arming command without specifying the profile 
+              // the server can only send a generic arming command without specifying the profile
+              this.log.info("Arming alarm");
               return this.alarmServer.arm();
             }
           }
@@ -122,6 +123,7 @@ export class VideofiedAlarmAccessory implements AccessoryPlugin {
           switch (this.cachedAlarmTargetState) {
             case "disarm": {
               // arm > disarm
+              this.log.info("Disarming alarm");
               return this.alarmServer.disarm();
             }
             case "armStay":
@@ -161,7 +163,7 @@ export class VideofiedAlarmAccessory implements AccessoryPlugin {
         break;
     }
 
-    this.log.debug(`Setting updated alarm state: ${this.cachedAlarmState}`);
+    this.log.info(`Setting updated alarm state: ${this.cachedAlarmState}`);
 
     this.securitySystemService
       .getCharacteristic(
