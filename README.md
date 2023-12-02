@@ -31,7 +31,7 @@ You must configure the Videofied panel to connect to the server. The panel must 
 3. Select "Central Station Configuration"
 4. Select "Frontel Security Parameters"
     - Toggle to "Enable"
-    - Configure "Server Addresses" to the Homebrige server IP
+    - Configure "Server Addresses" to the Homebridge server IP
 
 By default the panel will only connect to the server upon an event (e.g. armed/disarmed) and disconnect from the server after 5 minutes. After the panel is disconnected, it is no longer possible to send commands to the panel.
 
